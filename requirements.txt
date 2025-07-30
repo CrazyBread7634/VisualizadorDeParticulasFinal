@@ -1,0 +1,11 @@
+# requirements.txt — dependencias mínimas para usar optimamente el Visualizador Molecular
+
+Flask>=2.0            # Micro‑framework web
+Flask-SocketIO>=5.0   # WebSocket para Flask
+python-socketio>=5.0  # Cliente/servidor Socket.IO
+python-engineio>=4.0  # Motor interno de Socket.IO
+opencv-python>=4.5    # Captura y procesamiento de video
+mediapipe>=0.8        # Detección de manos y landmarks
+numpy>=1.21           # Álgebra y manipulacion de arrays
+Pillow>=8.0           # Manipulación de imágenes (PIL)
+rdkit-pypi>=2021.9.2  # Química computacional con RDKit
