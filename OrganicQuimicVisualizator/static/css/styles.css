@@ -1,0 +1,1191 @@
+/* ===== CSS PARA RDKIT MOLECULAR VIEWER + GESTOS ===== */
+
+/* Reset y configuración base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d2d5f 100%);
+    min-height: 100vh;
+    color: white;
+}
+
+/* Layout principal */
+.container {
+    display: grid;
+    grid-template-columns: 300px 1fr 400px;
+    grid-template-rows: 80px 1fr;
+    height: 100vh;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    padding: 0 30px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 300;
+    background: linear-gradient(45deg, #d5eaea, #a9bfeb);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+/* Panel de control molecular */
+.control-panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.section {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section h3 {
+    margin-bottom: 15px;
+    color: #4ECDC4;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.molecule-selector {
+    margin-bottom: 15px;
+}
+
+.molecule-selector select {
+    width: 100%;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    backdrop-filter: blur(5px);
+}
+
+.molecule-selector select:focus {
+    outline: none;
+    border-color: #4ECDC4;
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+}
+
+.molecule-selector option {
+    background: #2a2a2a;
+    color: white;
+    padding: 8px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.input-group input, 
+.input-group textarea {
+    width: 100%;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: #4ECDC4;
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.input-group textarea {
+    resize: vertical;
+    height: 60px;
+    font-family: 'Courier New', monospace;
+}
+
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.properties-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.property-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.property-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.property-value {
+    font-size: 14px;
+    font-weight: bold;
+    color: #4ECDC4;
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Panel central - visualización */
+.viewer-panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.viewer-container {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15;
+}
+
+.molecule-display {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.molecule-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.molecule-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.camera-view {
+    max-width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    margin-top: 15px;
+    margin: 10px;
+    position: relative;
+}
+
+.camera-stream {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gesture-info {
+    position: absolute;
+    top: 10px;
+    left: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 10;
+}
+
+/* Panel de análisis */
+.analysis-panel {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.docking-score {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.docking-score::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.score-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: #4ECDC4;
+    margin-bottom: 5px;
+    transition: color 0.3s ease;
+}
+
+.score-value.high {
+    color: #4CAF50;
+}
+
+.score-value.medium {
+    color: #FF9800;
+}
+
+.score-value.low {
+    color: #f44336;
+}
+
+.score-label {
+    font-size: 14px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.viewer-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.control-btn {
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn.active {
+    background: rgba(76, 175, 80, 0.8);
+    border-color: #4CAF50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+}
+
+.molecular-info {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.molecular-info h4 {
+    color: #4ECDC4;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.molecular-info p {
+    margin: 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.molecular-info strong {
+    color: #FFD93D;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    flex-direction: column;
+    gap: 15px;
+}
+
+.loading::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #4ECDC4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estados de conexión */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+}
+
+.status-connected {
+    background: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+    animation: pulse-green 2s infinite;
+}
+
+.status-disconnected {
+    background: #f44336;
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+}
+
+@keyframes pulse-green {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.7; 
+        transform: scale(1.1);
+    }
+}
+
+.rdkit-info {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 12px;
+    border-left: 3px solid #4ECDC4;
+    backdrop-filter: blur(5px);
+}
+
+/* Efectos especiales para moléculas */
+.molecule-loaded {
+    animation: molecule-appear 0.5s ease-out;
+}
+
+@keyframes molecule-appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) rotate(-5deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* Estilos para diferentes tipos de análisis */
+.analysis-ligando {
+    border-left: 3px solid #FF6B6B;
+}
+
+.analysis-receptor {
+    border-left: 3px solid #4ECDC4;
+}
+
+.analysis-interaction {
+    border-left: 3px solid #FFD93D;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 250px 1fr 300px;
+        gap: 15px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .properties-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 60px auto 1fr auto;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .analysis-panel, 
+    .control-panel {
+        max-height: 300px;
+    }
+
+    .viewer-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 10px;
+        height: auto;
+        padding: 15px;
+    }
+
+    .controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .section {
+        padding: 10px;
+    }
+
+    .viewer-panel,
+    .control-panel,
+    .analysis-panel {
+        padding: 15px;
+    }
+
+    .score-value {
+        font-size: 28px;
+    }
+
+    .properties-grid {
+        gap: 5px;
+    }
+
+    .property-item {
+        padding: 6px;
+        font-size: 11px;
+    }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Efectos de hover adicionales */
+.section:hover {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.viewer-container:hover {
+    box-shadow: inset 0 0 20px rgba(78, 205, 196, 0.1);
+}
+
+/* Animaciones de actualización */
+.updating {
+    animation: update-flash 0.3s ease;
+}
+
+@keyframes update-flash {
+    0%, 100% { background-color: rgba(255, 255, 255, 0.1); }
+    50% { background-color: rgba(78, 205, 196, 0.3); }
+}
+
+/* Estados de moléculas */
+.molecule-active {
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+}
+
+.molecule-inactive {
+    opacity: 0.7;
+    filter: grayscale(0.3);
+}
+
+/* ===== ESTILOS ADICIONALES PARA INTEGRACIÓN GEMINI AI ===== */
+
+/* Controles de IA */
+.ai-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#gemini-model-select {
+    width: 100%;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+#gemini-model-select:focus {
+    outline: none;
+    border-color: #4ECDC4;
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+}
+
+#gemini-model-select option {
+    background: #2a2a2a;
+    color: white;
+    padding: 8px;
+}
+
+/* Botones de IA mejorados */
+.control-btn {
+    position: relative;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.control-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.control-btn:disabled:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-text {
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.btn-loader {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+
+/* Spinner animado */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #4ECDC4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Resultados de análisis IA */
+.ai-results {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-height: 400px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.ai-results:hover {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Placeholder inicial */
+.analysis-placeholder {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    line-height: 1.6;
+    padding: 20px;
+    border: 2px dashed rgba(78, 205, 196, 0.3);
+    border-radius: 8px;
+    background: rgba(78, 205, 196, 0.05);
+}
+
+/* Contenido de análisis */
+.analysis-content {
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.analysis-content h4 {
+    color: #4ECDC4;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(78, 205, 196, 0.3);
+    padding-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.analysis-content h4:first-child {
+    margin-top: 0;
+}
+
+.analysis-content p {
+    margin-bottom: 15px;
+    text-align: justify;
+    padding-left: 10px;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+/* Tipos específicos de análisis */
+.interaction-analysis {
+    border-left: 4px solid #FFD93D;
+    padding-left: 15px;
+    margin: 15px 0;
+    background: rgba(255, 217, 61, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.gesture-suggestions {
+    border-left: 4px solid #FF6B6B;
+    padding-left: 15px;
+    margin: 15px 0;
+    background: rgba(255, 107, 107, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+/* Estados de notificación */
+.ai-error {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 107, 107, 0.3);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: shakeError 0.5s ease-in-out;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.ai-success {
+    color: #4ecdc4;
+    background: rgba(78, 205, 196, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid rgba(78, 205, 196, 0.3);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: pulseSuccess 1s ease-in-out;
+}
+
+@keyframes pulseSuccess {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* Estado de carga para el panel completo */
+.ai-results.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.ai-results.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 10px;
+}
+
+.ai-results.loading::after {
+    content: '🤖 Analizando con IA...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #4ECDC4;
+    font-weight: bold;
+    z-index: 11;
+}
+
+/* Mejoras al header para incluir IA */
+.header h1 {
+    font-size: 24px;
+    font-weight: 300;
+    background: linear-gradient(45deg, #d5eaea, #a9bfeb, #4ECDC4);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Información de gestos extendida */
+.gesture-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 10;
+    min-width: 150px;
+}
+
+.gesture-info div {
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gesture-info div:last-child {
+    margin-bottom: 0;
+}
+
+.gesture-info strong {
+    color: #4ECDC4;
+    margin-right: 8px;
+}
+
+/* Indicadores de estado mejorados */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.status-connected {
+    background: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+    animation: pulse-green 2s infinite;
+}
+
+.status-connected::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    animation: ripple 2s infinite;
+}
+
+.status-disconnected {
+    background: #f44336;
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+    animation: pulse-red 1s infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.7; 
+        transform: scale(1.1);
+    }
+}
+
+@keyframes pulse-red {
+    0%, 100% { 
+        opacity: 1; 
+    }
+    50% { 
+        opacity: 0.5; 
+    }
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Scrollbar personalizado para resultados IA */
+.ai-results::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-results::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.ai-results::-webkit-scrollbar-thumb {
+    background: rgba(78, 205, 196, 0.5);
+    border-radius: 3px;
+}
+
+.ai-results::-webkit-scrollbar-thumb:hover {
+    background: rgba(78, 205, 196, 0.7);
+}
+
+/* Efectos de hover para elementos interactivos */
+.ai-controls select:hover,
+.ai-controls button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Animación de éxito para análisis completado */
+.analysis-complete {
+    animation: completePulse 0.6s ease-out;
+}
+
+@keyframes completePulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7);
+    }
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 10px rgba(78, 205, 196, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(78, 205, 196, 0);
+    }
+}
+
+/* Responsive design para IA */
+@media (max-width: 1200px) {
+    .ai-results {
+        max-height: 300px;
+    }
+    
+    .analysis-content {
+        font-size: 13px;
+    }
+    
+    .analysis-content h4 {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ai-controls {
+        gap: 8px;
+    }
+    
+    .control-btn {
+        min-height: 36px;
+        font-size: 13px;
+    }
+    
+    .ai-results {
+        max-height: 250px;
+        padding: 12px;
+    }
+    
+    .analysis-content {
+        font-size: 12px;
+    }
+    
+    .analysis-content h4 {
+        font-size: 14px;
+    }
+    
+    .gesture-info {
+        position: relative;
+        margin-top: 10px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .analysis-placeholder {
+        padding: 15px;
+        font-size: 12px;
+    }
+    
+    .ai-success,
+    .ai-error {
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .interaction-analysis,
+    .gesture-suggestions {
+        padding: 12px;
+        margin: 12px 0;
+    }
+}
+
+/* Tema dark mode mejorado para IA */
+@media (prefers-color-scheme: dark) {
+    .ai-results {
+        background: rgba(0, 0, 0, 0.5);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .analysis-content p {
+        background: rgba(255, 255, 255, 0.03);
+        border-left-color: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Efectos especiales para carga de IA */
+.ai-thinking {
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-thinking::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+    animation: thinking 2s infinite;
+}
+
+@keyframes thinking {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Badges informativos */
+.ai-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(78, 205, 196, 0.2);
+    color: #4ECDC4;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-left: 8px;
+    border: 1px solid rgba(78, 205, 196, 0.3);
+}
+
+.ai-badge.model-badge {
+    background: rgba(255, 217, 61, 0.2);
+    color: #FFD93D;
+    border-color: rgba(255, 217, 61, 0.3);
+}
+
+.ai-badge.status-badge {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    border-color: rgba(76, 175, 80, 0.3);
+}
+
+/* Tooltip mejorado */
+[title] {
+    position: relative;
+}
+
+[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    pointer-events: none;
+    margin-bottom: 2px;
+}

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador Molecular RDKit + Gestos + IA</title>
+    
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1> Visualizador Molecular +  IA</h1>
+            <div class="controls">
+                <button class="btn" onclick="resetViewer()"> Reset</button>
+                <button class="btn" onclick="exportData()"> Exportar</button>
+                <button class="btn" onclick="toggleFullscreen()"> Pantalla Completa</button>
+                <button class="btn" onclick="testGemini()" title="Probar conexión con Gemini"> Test IA</button>
+            </div>
+        </div>
+
+        <!-- Panel de Control -->
+        <div class="control-panel">
+            <div class="section">
+                <h3>Estado de Conexión</h3>
+                <div class="rdkit-info">
+                    <span class="status-indicator" id="connectionStatus"></span>
+                    <span id="connectionText">Conectando...</span>
+                </div>
+                <div class="rdkit-info" style="margin-top: 10px;">
+                    <span class="status-indicator" id="geminiStatus"></span>
+                    <span id="geminiText">IA: Verificando...</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Cargar Ligando</h3>
+                <div class="molecule-selector">
+                    <select id="ligandoSelector" onchange="cargarMoleculaPredefinida('ligando')">
+                        <option value="">Seleccionar molécula...</option>
+                        <option value="estradiol">Estradiol</option>
+                        <option value="fulvestrant">Fulvestrant</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="ligandoSmiles">O ingresa SMILES personalizado:</label>
+                    <textarea id="ligandoSmiles" placeholder="Ej: CCO (etanol)"></textarea>
+                    <button onclick="cargarMoleculaSmiles('ligando')" class="btn" style="width: 100%; margin-top: 8px;">
+                        Cargar SMILES Ligando
+                    </button>
+                </div>
+
+                <div id="ligandoProps" class="properties-grid" style="display: none;">
+                    <!-- Propiedades del ligando se llenarán aquí -->
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Cargar Receptor</h3>
+                <div class="molecule-selector">
+                    <select id="receptorSelector" onchange="cargarMoleculaPredefinida('receptor')">
+                        <option value="">Seleccionar molécula...</option>
+                        <option value="estradiol">Estradiol</option>
+                        <option value="fulvestrant">Fulvestrant</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="receptorSmiles">O ingresa SMILES personalizado:</label>
+                    <textarea id="receptorSmiles" placeholder="Ej: c1ccccc1 (benceno)"></textarea>
+                    <button onclick="cargarMoleculaSmiles('receptor')" class="btn" style="width: 100%; margin-top: 8px;">
+                        Cargar SMILES Receptor
+                    </button>
+                </div>
+
+                <div id="receptorProps" class="properties-grid" style="display: none;">
+                    <!-- Propiedades del receptor se llenarán aquí -->
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Controles de Vista</h3>
+                <div class="viewer-controls">
+                    <button class="control-btn" id="btn2D" onclick="cambiarVista('2d')">Vista 2D</button>
+                    <button class="control-btn active" id="btn3D" onclick="cambiarVista('3d')">Vista 3D</button>
+                    <button class="control-btn" onclick="cambiarEstilo('stick')">Stick</button>
+                    <button class="control-btn" onclick="cambiarEstilo('sphere')">Sphere</button>
+                    <button class="control-btn" onclick="cambiarEstilo('line')">Line</button>
+                    <button class="control-btn" onclick="toggleHydrogens()">H atoms</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Central - Visualizador -->
+        <div class="viewer-panel">
+            <div class="viewer-container">
+                <!-- CÁMARA ARRIBA PARA GESTOS -->
+                <div class="camera-view">
+                    <img src="/camara" class="camera-stream" alt="Control por gestos">
+                    <div class="gesture-info" id="gestureInfo">
+                        <div><strong>Modo:</strong> <span id="gestureMode">libre</span></div>
+                        <div><strong>Manos:</strong> <span id="handCount">0</span></div>
+                        <div><strong>IA:</strong> <span id="aiSuggestionStatus">Disponible</span></div>
+                    </div>
+                </div>
+
+                <!-- MOLÉCULA ABAJO (ÁREA PRINCIPAL) -->
+                <div class="molecule-display" id="moleculeDisplay">
+                    <div class="loading" id="loadingDisplay">
+                        Carga una molécula para comenzar la visualización
+                    </div>
+                    <img id="moleculeImage" class="molecule-image" style="display: none;" alt="Molécula">
+                </div>
+            </div>
+
+            <div class="molecular-info">
+                <h4>Información de Visualización</h4>
+                <p><strong>1 mano cerrada:</strong> Rotar molécula en 3D</p>
+                <p><strong>2 manos cerradas:</strong> Trasladar molécula</p>
+                <p><strong>2 manos separadas:</strong> Zoom in/out</p>
+                <p><strong> IA disponible:</strong> Análisis molecular automático</p>
+            </div>
+        </div>
+
+        <!-- Panel de Análisis EXTENDIDO CON IA -->
+        <div class="analysis-panel">
+            <div class="section">
+                <h3>Score de Docking</h3>
+                <div class="docking-score">
+                    <div class="score-value" id="dockingScore">0.0</div>
+                    <div class="score-label">Puntuación de Afinidad</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Propiedades Moleculares</h3>
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #FF6B6B; margin-bottom: 10px;">Ligando</h4>
+                    <div id="ligandoAnalysis">
+                        <div class="property-item">
+                            <div class="property-value" id="ligandoMW">-</div>
+                            <div>Peso Molecular</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: #4ECDC4; margin-bottom: 10px;">Receptor</h4>
+                    <div id="receptorAnalysis">
+                        <div class="property-item">
+                            <div class="property-value" id="receptorMW">-</div>
+                            <div>Peso Molecular</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Análisis de Interacción</h3>
+                <div class="properties-grid">
+                    <div class="property-item">
+                        <div class="property-value" id="similarity">0%</div>
+                        <div>Similitud</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-value" id="complementarity">0%</div>
+                        <div>Complementariedad</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-value" id="lipophilicity">0.0</div>
+                        <div>LogP Promedio</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-value" id="hbonding">0</div>
+                        <div>H-bonds Potenciales</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Estado del Viewer</h3>
+                <div class="properties-grid">
+                    <div class="property-item">
+                        <div class="property-value" id="rotationX">0°</div>
+                        <div>Rotación X</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-value" id="rotationY">0°</div>
+                        <div>Rotación Y</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-value" id="zoomLevel">1.0x</div>
+                        <div>Zoom</div>
+                    </div>
+                    <div class="property-item">
+                        <div class="property-value" id="renderStyle">stick</div>
+                        <div>Estilo</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== NUEVO PANEL DE IA GEMINI ===== -->
+            <div class="section" id="ai-panel">
+                <h3> Análisis con IA</h3>
+                <div class="ai-controls">
+                    <select id="gemini-model-select">
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                    </select>
+                    <button id="analyze-molecule-btn" class="control-btn">
+                        <span class="btn-text">Analizar Molécula</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                    <button id="analyze-interaction-btn" class="control-btn" disabled>
+                        <span class="btn-text">Analizar Interacción</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                    <button id="gesture-suggestions-btn" class="control-btn">
+                        <span class="btn-text">Sugerencias Gestuales</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </div>
+                <div id="ai-analysis-results" class="ai-results">
+                    <div class="analysis-placeholder">
+                          Carga una molécula y haz clic en "Analizar Molécula" para obtener un análisis detallado con IA de Gemini.
+                        <br><br>
+                          <strong>Funciones disponibles:</strong>
+                        <br>• Análisis químico profesional
+                        <br>• Evaluación de interacciones moleculares  
+                        <br>• Sugerencias contextuales por gestos
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Exportar Datos</h3>
+                <button class="btn" onclick="exportarMolecula('ligando')" style="width: 100%; margin-bottom: 10px;">
+                      Exportar Ligando (JSON)
+                </button>
+                <button class="btn" onclick="exportarMolecula('receptor')" style="width: 100%; margin-bottom: 10px;">
+                      Exportar Receptor (JSON)
+                </button>
+                <button class="btn" onclick="exportarAnalisis()" style="width: 100%; margin-bottom: 10px;">
+                      Exportar Análisis (JSON)
+                </button>
+                <button class="btn" onclick="exportarAnalisisIA()" style="width: 100%;">
+                      Exportar Análisis IA (JSON)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS EXTERNOS ===== -->
+    <!-- Script principal del sistema -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Script de integración Gemini AI -->
+    <script src="{{ url_for('static', filename='js/gemini.js') }}"></script>
+</body>
+</html>
